@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-gradient-to-b from-mystical-dark to-mystical-medium min-h-screen;
+  }
+}
+
+@layer components {
+  .tarot-card {
+    @apply relative w-64 h-96 rounded-lg shadow-xl cursor-pointer transition-all duration-500 ease-in-out;
+  }
+  
+  .tarot-card-back {
+    @apply bg-gradient-to-br from-mystical-light to-mystical-dark border-2 border-mystical-gold;
+  }
+  
+  .card-pattern {
+    @apply absolute inset-0 opacity-30 bg-repeat mix-blend-overlay;
+    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0l1.545 4.13L15.1 1.545l-2.585 3.555L17 7l-4.485-.9L15.1 9.655l-3.555-2.585L10 12l-1.545-4.87-3.555 2.585 2.585-3.555L3 7l4.13-1.545L4.545 1.9 8.1 4.485 10 0z' fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+  }
+  
+  .mystic-button {
+    @apply px-6 py-3 bg-gradient-to-r from-mystical-medium to-mystical-light hover:from-mystical-light hover:to-mystical-accent text-white font-mystical rounded-md shadow-lg transform transition-all hover:scale-105 active:scale-95;
+  }
+  
+  .mystic-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer utilities {
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+  
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0,0,0,0.7);
+  }
+  
+  .bg-mystical-gradient {
+    @apply bg-gradient-to-br from-mystical-dark via-mystical-medium to-mystical-light;
+  }
+} 
