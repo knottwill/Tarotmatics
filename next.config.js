@@ -2,7 +2,22 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['oaidalleapiprodscus.blob.core.windows.net'], // For OpenAI generated images
+    // Replace domains with remotePatterns for more flexibility
+    // domains: ['oaidalleapiprodscus.blob.core.windows.net'], // For OpenAI generated images
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'oaidalleapiprodscus.blob.core.windows.net',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
 };
 
