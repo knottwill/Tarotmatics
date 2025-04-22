@@ -1,53 +1,62 @@
-# Speechmatics Flow NextJS example
 
-Example NextJS app using Speechmatics SDK packages.
+<p align="center">
+  <br/>
+  <img src="./assets/logo.svg"/>
+  <h1 align="center">Speechmatics Javascript SDK</h1>
+  <h3 align="center">Best-in-class speech technology for the web and beyond 🚀</h3>
+  <p align="center">Packages can be found in the <a href="/packages"><code>packages/</code></a> directory.
+  <p align="center">Check out our <a href="/examples"><code>examples/</code></a> to see them in action
+</p>
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-The app is styled using [Tailwind](https://tailwindcss.com/) classnames, along with [DaisyUI](https://daisyui.com/) component library.
+> [!IMPORTANT]  
+> **The [`speechmatics` NPM package](https://www.npmjs.com/package/speechmatics) has been deprecated**, and will not be updated further. The packages in this repo offer similar functionality. If you have any issues upgrading, don't hesitate to [get in touch](#feedback--help).
 
-## Packages used
-In order to build a React/NextJS app and have Flow working in a browser, this example utilises some of the Speechmatics SDK packages (you can check out their READMEs for more details):
+## Packages
 
-- [@speechmatics/auth](https://github.com/speechmatics/speechmatics-js-sdk/tree/main/packages/auth)
-- [@speechmatics/browser-audio-input](https://github.com/speechmatics/speechmatics-js-sdk/tree/main/packages/browser-audio-input)
-- [@speechmatics/browser-audio-input-react](https://github.com/speechmatics/speechmatics-js-sdk/tree/main/packages/browser-audio-input-react)
-- [@speechmatics/flow-client-react](https://github.com/speechmatics/speechmatics-js-sdk/tree/main/packages/flow-client-react)
-- [@speechmatics/web-pcm-player-react](https://github.com/speechmatics/speechmatics-js-sdk/tree/main/packages/web-pcm-player-react)
-]
+See the `README.md` files in each package for installation and usage details:
 
-Please check the package.json file for any other dependencies.
 
-# Installation and setup
+### API clients
 
-## Check Node version
+Official JS clients for Speechmatics APIs
 
-Make sure you are using Node 22 or higher. You can use [NVM to manage Node versions](https://github.com/nvm-sh/nvm?tab=readme-ov-file#install--update-script).
+- **Batch client**: Upload files for transcription:
+  
+  [`@speechmatics/batch-client`](./packages/batch-client)
+- **Real-time client**: Stream audio data for real-time transcription:
+  
+  [`@speechmatics/real-time-client`](./packages/real-time-client)
+- **Flow client**: Interact with Flow API, our voice assistant engine:
+  
+  [`@speechmatics/flow-client`](./packages/flow-client)
 
-## Generate an API key
+### React hooks
 
-To access the APIs and generate JWTs, you'll first need to generate an API key in the Speechmatics  user portal: https://portal.speechmatics.com/api-keys/
+Wrappers of the clients above to integrate into React projects:
 
-Once you've got that, create a `.env` file in this directory:
+- [`@speechmatics/flow-client-react`](./packages/flow-client-react)
 
-```
-API_KEY=<your api key>
-```
+## Supported JS runtimes
 
-## Install dependencies
+Our philosophy is to adhere to web standard APIs as much as possible. We aim for our SDKs to work in all browsers, React Native, Deno, Bun and Cloudflare edge environments.
 
-In this directory run
+If you encounter any issues running out SDKs in one of these environments, please [open an issue](https://github.com/speechmatics/speechmatics-js-sdk/issues/new).
 
-```
-pnpm i
-```
+## Documentation
 
-This will install all dependencies, including the Speechmatics packages defined in this repo.
+The documentation for the API can be found [here](https://docs.speechmatics.com/).
 
-## Run the app
+More examples on how to use the SDK can be found in the [examples](./examples) folder.
 
-Next, run this command to open the app on port 3000:
+Our Portal is also a good source of information on how to use the API. You can find it [here](https://portal.speechmatics.com/). Check out `Upload` and `Realtime Demo` sections.
 
-```
-pnpm dev
-```
+## Contributing
+
+We'd love to see your contributions! Please read our [contributing guidelines](./CONTRIBUTING.md) for more information.
+
+## Feedback & Help
+
+- For feature requests or bugs [open an issue](https://github.com/speechmatics/speechmatics-js-sdk/issues/new) 
+- To provide direct feedback, email us at [devrel@speechmatics.com](mailto:devrel@speechmatics.com)
+- We're [@speechmatics](https://twitter.com/Speechmatics) on Twitter too!

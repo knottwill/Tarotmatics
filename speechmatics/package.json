@@ -1,37 +1,39 @@
 {
-  "name": "nextjs-flow",
-  "version": "0.1.0",
+  "name": "speechmatics-js-sdk",
   "private": true,
+  "version": "1.0.0",
+  "description": "Monorepo for Speechmatics Javascript libraries",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "engineStrict": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "clean:deps": "rm -rf node_modules && pnpm -r exec rm -rf node_modules",
+    "clean:builds": "pnpm -r exec rm -rf dist",
+    "clean": "pnpm clean:deps && pnpm clean:builds",
+    "format": "biome format --write .",
+    "lint": "biome lint --write .",
+
+    "format:check": "biome format .",
+    "lint:check": "biome lint .",
+
+    "build:packages": "pnpm --filter '{packages/*}' build",
+    "publish:packages": "pnpm --filter '{packages/*}' publish --access=public"
   },
-  "dependencies": {
-    "@livekit/components-react": "^2.8.1",
-    "@livekit/components-styles": "^1.1.4",
-    "@speechmatics/auth": "workspace:*",
-    "@speechmatics/browser-audio-input": "workspace:*",
-    "@speechmatics/browser-audio-input-react": "workspace:*",
-    "@speechmatics/flow-client-react": "workspace:*",
-    "@speechmatics/web-pcm-player-react": "workspace:*",
-    "livekit-client": "^2.9.5",
-    "next": "15.2.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-error-boundary": "^4.1.2",
-    "typescript-event-target": "^1.1.1"
-  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "copy-webpack-plugin": "^12.0.2",
-    "daisyui": "^4.12.23",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "@biomejs/biome": "^1.9.4",
+    "@changesets/cli": "^2.27.7",
+    "@openapitools/openapi-generator-cli": "^2.13.5",
+    "@types/node": "^22.5.2",
+    "esbuild": "^0.23.1",
+    "rollup": "^4.21.2",
+    "rollup-plugin-dts": "^6.1.1",
+    "rollup-plugin-esbuild": "^6.1.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4"
   }
 }
