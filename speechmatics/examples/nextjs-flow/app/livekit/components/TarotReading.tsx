@@ -424,7 +424,7 @@ const generateTarotImage = async (cardName: string, transcript: string): Promise
   }
 
   // If there's already a pending request, return its promise
-  if (requestPromises[cardName]) {
+  if (requestPromises[cardName] !== undefined) {
     console.log('🎨 Reusing pending request for:', cardName);
     return requestPromises[cardName];
   }
@@ -461,12 +461,22 @@ const generateTarotImage = async (cardName: string, transcript: string): Promise
       console.log('🎨 Sending image generation request for:', cardName);
       const apiUrl = new URL('/api/generate-image', window.location.origin);
       
+      const imageRequest = {
+        prompt,
+        model: "dall-e-3",
+        size: "1024x1024",
+        quality: "standard",
+        style: "natural"
+      };
+
+      console.log('🎨 DALL-E request:', JSON.stringify(imageRequest, null, 2));
+      
       const response = await fetch(apiUrl.toString(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify(imageRequest),
       });
 
       console.log('📥 Image generation response status:', response.status);
