@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     const messages = [
       {
         role: "system",
-        content: `You are a creative tarot card illustrator. Create a detailed prompt for DALL-E 3 to generate a tarot card image that incorporates the meaning of the card and the context of the conversation. The image should be mystical, detailed, and in the style of the Rider-Waite tarot deck.`
+        content: `You are a creative tarot card illustrator. Create a detailed prompt for DALL-E 3 to generate a tarot card image that incorporates the meaning of the card and the issue that the user is facing. The image should be mystical, detailed, and in the style of the Rider-Waite tarot deck.`
       },
       {
         role: "user",
