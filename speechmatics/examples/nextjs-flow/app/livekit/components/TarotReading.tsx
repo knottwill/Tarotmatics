@@ -585,7 +585,7 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
   }, [transcriptGroups]);
 
   return (
-    <div className="bg-gray-800/50 rounded-lg p-6 border border-purple-500/20 w-[70%] mx-auto relative">
+    <div className="bg-gray-800/50 rounded-lg p-4 border border-purple-500/20 w-[70%] mx-auto relative">
       <MagicSparkles />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
         {Array.from({ length: 3 }).map((_, index) => (
