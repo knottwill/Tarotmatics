@@ -416,7 +416,7 @@ const imageCache: Record<string, string> = {};
 const pendingRequests: Set<string> = new Set();
 const requestPromises: Record<string, Promise<string>> = {};
 
-const generateTarotImage = async (cardName: string): Promise<string> => {
+const generateTarotImage = async (cardName: string, transcript: string): Promise<string> => {
   // Check cache first
   if (imageCache[cardName]) {
     console.log('🎨 Using cached image for:', cardName);
@@ -424,55 +424,89 @@ const generateTarotImage = async (cardName: string): Promise<string> => {
   }
 
   // If there's already a pending request, return its promise
-  if (requestPromises[cardName]) {
+  if (requestPromises[cardName] !== undefined) {
     console.log('🎨 Reusing pending request for:', cardName);
     return requestPromises[cardName];
   }
 
   console.log('🎨 Starting image generation for card:', cardName);
-  const prompt = `A mystical tarot card illustration of ${cardName}, highly detailed, mystical atmosphere, golden accents, intricate patterns, in the style of the Rider-Waite tarot deck, digital art, 4k, masterpiece, best quality`;
+  console.log('📚 Transcript length:', transcript.length);
   
   // Create a new promise for this request
   requestPromises[cardName] = (async () => {
     try {
       pendingRequests.add(cardName);
-      console.log('📤 Sending request to our API...');
+      console.log('🔄 Active requests:', pendingRequests.size);
+
+      // First, generate a personalized prompt using ChatGPT
+      console.log('🤖 Generating personalized prompt for:', cardName);
+      const promptResponse = await fetch('/api/generate-prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ transcript, cardName }),
+      });
+
+      if (!promptResponse.ok) {
+        const error = await promptResponse.json();
+        console.error('❌ Prompt generation failed:', error);
+        throw new Error('Failed to generate prompt');
+      }
+
+      const { prompt } = await promptResponse.json();
+      console.log('📝 Using prompt:', prompt);
+      
+      // Now generate the image using DALL-E
+      console.log('🎨 Sending image generation request for:', cardName);
       const apiUrl = new URL('/api/generate-image', window.location.origin);
-      console.log('🌐 API URL:', apiUrl.toString());
+      
+      const imageRequest = {
+        prompt,
+        model: "dall-e-3",
+        size: "1024x1024",
+        quality: "standard",
+        style: "natural"
+      };
+
+      console.log('🎨 DALL-E request:', JSON.stringify(imageRequest, null, 2));
       
       const response = await fetch(apiUrl.toString(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify(imageRequest),
       });
 
-      console.log('📥 Received response:', response.status, response.statusText);
+      console.log('📥 Image generation response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ API Error:', errorData);
+        console.error('❌ Image generation failed:', errorData);
         throw new Error(errorData.error || `API Error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log('✅ Image generated successfully:', data);
+      console.log('✅ Image generated successfully for:', cardName);
+      console.log('🖼️ Image URL:', data.imageUrl);
       
       if (!data.imageUrl) {
-        console.error('❌ No image URL in response:', data);
+        console.error('❌ No image URL in response');
         throw new Error('No image URL in response');
       }
       
       // Cache the image URL
       imageCache[cardName] = data.imageUrl;
+      console.log('💾 Cached image for:', cardName);
       return data.imageUrl;
     } catch (error) {
-      console.error('❌ Error in generateTarotImage:', error);
+      console.error('❌ Error in generateTarotImage for', cardName, ':', error);
       throw error;
     } finally {
       pendingRequests.delete(cardName);
       delete requestPromises[cardName];
+      console.log('🔄 Remaining active requests:', pendingRequests.size);
     }
   })();
 
@@ -533,10 +567,14 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
           
           // Generate images for each card that hasn't been cached yet
           setIsGenerating(true);
+          const transcriptText = transcriptGroups
+            .map(group => group.data.map(response => response.text).join(' '))
+            .join(' ');
+
           foundCards.forEach(card => {
             if (!imageCache[card.name] && !pendingRequests.has(card.name)) {
               setLoadingCards(prev => new Set([...prev, card.name]));
-              generateTarotImage(card.name)
+              generateTarotImage(card.name, transcriptText)
                 .then(() => {
                   setLoadingCards(prev => {
                     const newSet = new Set(prev);
