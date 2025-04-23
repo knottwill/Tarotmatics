@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TranscriptContainer } from '@/components/TranscriptView';
 import type { TranscriptGroup } from '@/lib/transcript-types';
 
@@ -411,56 +411,156 @@ interface TarotReadingProps {
   onReadingComplete: (cards: typeof TAROT_CARDS[0][]) => void;
 }
 
+// Add this outside the component to persist across renders
+const imageCache: Record<string, string> = {};
+const pendingRequests: Set<string> = new Set();
+const requestPromises: Record<string, Promise<string>> = {};
+
+const generateTarotImage = async (cardName: string): Promise<string> => {
+  // Check cache first
+  if (imageCache[cardName]) {
+    console.log('🎨 Using cached image for:', cardName);
+    return imageCache[cardName];
+  }
+
+  // If there's already a pending request, return its promise
+  if (requestPromises[cardName]) {
+    console.log('🎨 Reusing pending request for:', cardName);
+    return requestPromises[cardName];
+  }
+
+  console.log('🎨 Starting image generation for card:', cardName);
+  const prompt = `A mystical tarot card illustration of ${cardName}, highly detailed, mystical atmosphere, golden accents, intricate patterns, in the style of the Rider-Waite tarot deck, digital art, 4k, masterpiece, best quality`;
+  
+  // Create a new promise for this request
+  requestPromises[cardName] = (async () => {
+    try {
+      pendingRequests.add(cardName);
+      console.log('📤 Sending request to our API...');
+      const apiUrl = new URL('/api/generate-image', window.location.origin);
+      console.log('🌐 API URL:', apiUrl.toString());
+      
+      const response = await fetch(apiUrl.toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      console.log('📥 Received response:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ API Error:', errorData);
+        throw new Error(errorData.error || `API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Image generated successfully:', data);
+      
+      if (!data.imageUrl) {
+        console.error('❌ No image URL in response:', data);
+        throw new Error('No image URL in response');
+      }
+      
+      // Cache the image URL
+      imageCache[cardName] = data.imageUrl;
+      return data.imageUrl;
+    } catch (error) {
+      console.error('❌ Error in generateTarotImage:', error);
+      throw error;
+    } finally {
+      pendingRequests.delete(cardName);
+      delete requestPromises[cardName];
+    }
+  })();
+
+  return requestPromises[cardName];
+};
+
 export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadingProps) {
   const [selectedCards, setSelectedCards] = useState<typeof TAROT_CARDS[0][]>([]);
   const [isReadingComplete, setIsReadingComplete] = useState(false);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [loadingCards, setLoadingCards] = useState<Set<string>>(new Set());
+  const lastProcessedGroupRef = useRef<string>('');
 
   useEffect(() => {
     // Check the latest transcript group for tarot reading mentions
     const latestGroup = transcriptGroups[transcriptGroups.length - 1];
-    if (latestGroup && latestGroup.type === 'agent') {
-      const text = latestGroup.data
-        .map(response => response.text)
-        .join(' ')
-        .toLowerCase();
+    if (!latestGroup || latestGroup.type !== 'agent') return;
+
+    // Skip if we've already processed this group
+    const groupId = JSON.stringify(latestGroup);
+    if (groupId === lastProcessedGroupRef.current) return;
+    lastProcessedGroupRef.current = groupId;
+
+    const text = latestGroup.data
+      .map(response => response.text)
+      .join(' ')
+      .toLowerCase();
+    
+    // Check for any mention of cards or reading
+    if (text.includes('card') || text.includes('reading')) {
+      // Create a regex pattern that matches any card name
+      const cardPattern = new RegExp(
+        TAROT_CARDS.map(card => 
+          card.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        ).join('|'),
+        'g'
+      );
+
+      // Find all card mentions in the text
+      const cardMatches = text.match(cardPattern);
       
-      // Check for any mention of cards or reading
-      if (text.includes('card') || text.includes('reading')) {
-        // Create a regex pattern that matches any card name
-        const cardPattern = new RegExp(
-          TAROT_CARDS.map(card => 
-            card.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-          ).join('|'),
-          'g'
-        );
-
-        // Find all card mentions in the text
-        const cardMatches = text.match(cardPattern);
+      if (cardMatches && cardMatches.length > 0) {
+        // Get unique card names
+        const uniqueCardNames = [...new Set(cardMatches)];
         
-        if (cardMatches && cardMatches.length > 0) {
-          // Get unique card names
-          const uniqueCardNames = [...new Set(cardMatches)];
-          
-          // Find the corresponding card objects
-          const foundCards = uniqueCardNames
-            .map(cardName => TAROT_CARDS.find(card => 
-              card.name.toLowerCase() === cardName
-            ))
-            .filter((card): card is typeof TAROT_CARDS[0] => card !== undefined);
+        // Find the corresponding card objects
+        const foundCards = uniqueCardNames
+          .map(cardName => TAROT_CARDS.find(card => 
+            card.name.toLowerCase() === cardName
+          ))
+          .filter((card): card is typeof TAROT_CARDS[0] => card !== undefined);
 
-          if (foundCards.length > 0) {
-            setSelectedCards(foundCards);
-            setIsReadingComplete(true);
-            onReadingComplete(foundCards);
-            
-            // Flip each card with a delay
-            foundCards.forEach((_, index) => {
-              setTimeout(() => {
-                setFlippedCards(prev => [...prev, index]);
-              }, index * 500); // 500ms delay between each flip
-            });
-          }
+        if (foundCards.length > 0) {
+          setSelectedCards(foundCards);
+          setIsReadingComplete(true);
+          onReadingComplete(foundCards);
+          
+          // Generate images for each card that hasn't been cached yet
+          setIsGenerating(true);
+          foundCards.forEach(card => {
+            if (!imageCache[card.name] && !pendingRequests.has(card.name)) {
+              setLoadingCards(prev => new Set([...prev, card.name]));
+              generateTarotImage(card.name)
+                .then(() => {
+                  setLoadingCards(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(card.name);
+                    return newSet;
+                  });
+                })
+                .catch(error => {
+                  console.error(`Error generating image for ${card.name}:`, error);
+                  setLoadingCards(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(card.name);
+                    return newSet;
+                  });
+                });
+            }
+          });
+          
+          // Flip each card with a delay
+          foundCards.forEach((_, index) => {
+            setTimeout(() => {
+              setFlippedCards(prev => [...prev, index]);
+            }, index * 500); // 500ms delay between each flip
+          });
         }
       }
     }
@@ -493,11 +593,17 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
                 <div className={`absolute inset-0 transition-transform duration-500 transform-gpu ${
                   flippedCards.includes(index) ? 'rotate-y-0' : 'rotate-y-180'
                 }`}>
-                  <img 
-                    src={selectedCards[index].image} 
-                    alt={selectedCards[index].name}
-                    className="w-full h-full object-cover"
-                  />
+                  {loadingCards.has(selectedCards[index].name) ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                    </div>
+                  ) : (
+                    <img
+                      src={imageCache[selectedCards[index].name] || selectedCards[index].image} 
+                      alt={selectedCards[index].name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -510,6 +616,11 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
           </div>
         ))}
       </div>
+      {isGenerating && (
+        <div className="mt-4 text-center text-purple-400">
+          Generating your cards...
+        </div>
+      )}
     </div>
   );
 } 
