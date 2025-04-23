@@ -491,81 +491,98 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
   useEffect(() => {
     // Check the latest transcript group for tarot reading mentions
     const latestGroup = transcriptGroups[transcriptGroups.length - 1];
-    if (!latestGroup || latestGroup.type !== 'agent') return;
+    if (!latestGroup || latestGroup.type !== 'agent') {
+      console.log('🔍 No agent message or no latest group found');
+      return;
+    }
 
     // Skip if we've already processed this group
     const groupId = JSON.stringify(latestGroup);
-    if (groupId === lastProcessedGroupRef.current) return;
+    if (groupId === lastProcessedGroupRef.current) {
+      console.log('🔄 Skipping already processed group');
+      return;
+    }
     lastProcessedGroupRef.current = groupId;
 
     const text = latestGroup.data
       .map(response => response.text)
-      .join(' ')
-      .toLowerCase();
+      .join(' ');
     
-    // Check for any mention of cards or reading
-    if (text.includes('card') || text.includes('reading')) {
-      // Create a regex pattern that matches any card name
-      const cardPattern = new RegExp(
-        TAROT_CARDS.map(card => 
-          card.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        ).join('|'),
-        'g'
-      );
+    console.log('📝 Processing message:', text);
+    
+    // Check for XML format tarot card reveal with time attribute
+    const tarotRevealMatch = text.match(/<TAROT revealed='([^']+)' time='([^']+)'\/>/i);
+    if (tarotRevealMatch) {
+      console.log('🎴 Found tarot card reveal:', {
+        cardName: tarotRevealMatch[1],
+        time: tarotRevealMatch[2]
+      });
 
-      // Find all card mentions in the text
-      const cardMatches = text.match(cardPattern);
+      const cardName = tarotRevealMatch[1];
+      const time = tarotRevealMatch[2].toLowerCase();
+      const card = TAROT_CARDS.find(c => c.name.toLowerCase() === cardName.toLowerCase());
       
-      if (cardMatches && cardMatches.length > 0) {
-        // Get unique card names
-        const uniqueCardNames = [...new Set(cardMatches)];
+      if (card) {
+        console.log('✅ Found matching card:', card.name);
         
-        // Find the corresponding card objects
-        const foundCards = uniqueCardNames
-          .map(cardName => TAROT_CARDS.find(card => 
-            card.name.toLowerCase() === cardName
-          ))
-          .filter((card): card is typeof TAROT_CARDS[0] => card !== undefined);
+        // Determine position based on the time attribute
+        let position = 0;
+        if (time === 'past') position = 0;
+        else if (time === 'present') position = 1;
+        else if (time === 'future') position = 2;
 
-        if (foundCards.length > 0) {
-          setSelectedCards(foundCards);
-          setIsReadingComplete(true);
-          onReadingComplete(foundCards);
-          
-          // Generate images for each card that hasn't been cached yet
-          setIsGenerating(true);
-          foundCards.forEach(card => {
-            if (!imageCache[card.name] && !pendingRequests.has(card.name)) {
-              setLoadingCards(prev => new Set([...prev, card.name]));
-              generateTarotImage(card.name)
-                .then(() => {
-                  setLoadingCards(prev => {
-                    const newSet = new Set(prev);
-                    newSet.delete(card.name);
-                    return newSet;
-                  });
-                })
-                .catch(error => {
-                  console.error(`Error generating image for ${card.name}:`, error);
-                  setLoadingCards(prev => {
-                    const newSet = new Set(prev);
-                    newSet.delete(card.name);
-                    return newSet;
-                  });
-                });
-            }
-          });
-          
-          // Flip each card with a delay
-          foundCards.forEach((_, index) => {
-            setTimeout(() => {
-              setFlippedCards(prev => [...prev, index]);
-            }, index * 500); // 500ms delay between each flip
-          });
+        console.log('📍 Card position:', { time, position });
+
+        // Update the selected cards array
+        setSelectedCards(prev => {
+          const newCards = [...prev];
+          newCards[position] = card;
+          console.log('🃏 Updated selected cards:', newCards.map(c => c?.name));
+          return newCards;
+        });
+
+        // Flip the specific card
+        setFlippedCards(prev => {
+          if (!prev.includes(position)) {
+            const newFlipped = [...prev, position];
+            console.log('🔄 Flipping card at position:', position, 'New flipped cards:', newFlipped);
+            return newFlipped;
+          }
+          console.log('⏭️ Card already flipped at position:', position);
+          return prev;
+        });
+
+        // Generate image if needed
+        if (!imageCache[card.name] && !pendingRequests.has(card.name)) {
+          console.log('🎨 Generating image for card:', card.name);
+          setLoadingCards(prev => new Set([...prev, card.name]));
+          generateTarotImage(card.name)
+            .then(() => {
+              console.log('✅ Image generated for card:', card.name);
+              setLoadingCards(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(card.name);
+                return newSet;
+              });
+            })
+            .catch(error => {
+              console.error('❌ Error generating image for card:', card.name, error);
+              setLoadingCards(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(card.name);
+                return newSet;
+              });
+            });
+        } else {
+          console.log('🖼️ Using cached image for card:', card.name);
         }
+      } else {
+        console.log('❌ No matching card found for:', cardName);
       }
+    } else {
+      console.log('❌ No tarot card reveal found in message');
     }
-  }, [transcriptGroups, onReadingComplete]);
+  }, [transcriptGroups]);
 
   return (
     <div className="bg-gray-800/50 rounded-lg p-6 border border-purple-500/20 w-[70%] mx-auto relative">
