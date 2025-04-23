@@ -406,82 +406,182 @@ const TAROT_CARDS = [
   }
 ];
 
-interface TarotReadingProps {
-  transcriptGroups: TranscriptGroup[];
-  onReadingComplete: (cards: typeof TAROT_CARDS[0][]) => void;
+interface GeneratedCard {
+  name: string;
+  meaning: string;
+  image: string | null;
+  isReversed: boolean;
 }
 
-export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadingProps) {
-  const [selectedCards, setSelectedCards] = useState<typeof TAROT_CARDS[0][]>([]);
-  const [showReading, setShowReading] = useState(false);
+interface TarotReadingProps {
+  transcriptGroups: TranscriptGroup[];
+  onReadingComplete: (cards: GeneratedCard[]) => void;
+}
 
-  useEffect(() => {
-    // Check the latest transcript group for tarot reading mentions
-    const latestGroup = transcriptGroups[transcriptGroups.length - 1];
-    if (latestGroup && latestGroup.type === 'agent') {
-      const text = latestGroup.data
-        .map(response => response.text)
-        .join(' ')
-        .toLowerCase();
-      
-      // Check for any mention of cards or reading
-      if (text.includes('card') || text.includes('reading')) {
-        // Create a regex pattern that matches any card name
-        const cardPattern = new RegExp(
-          TAROT_CARDS.map(card => 
-            card.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-          ).join('|'),
-          'g'
-        );
+const generateTarotImage = async (cardName: string): Promise<string> => {
+  console.log('🎨 Starting image generation for card:', cardName);
+  const prompt = `A mystical tarot card illustration of ${cardName}, highly detailed, mystical atmosphere, golden accents, intricate patterns, in the style of the Rider-Waite tarot deck, digital art, 4k, masterpiece, best quality`;
+  
+  try {
+    console.log('📤 Sending request to our API...');
+    const apiUrl = new URL('/api/generate-image', window.location.origin);
+    console.log('🌐 API URL:', apiUrl.toString());
+    
+    const response = await fetch(apiUrl.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt }),
+    });
 
-        // Find all card mentions in the text
-        const cardMatches = text.match(cardPattern);
-        
-        if (cardMatches && cardMatches.length > 0) {
-          // Get unique card names
-          const uniqueCardNames = [...new Set(cardMatches)];
-          
-          // Find the corresponding card objects
-          const foundCards = uniqueCardNames
-            .map(cardName => TAROT_CARDS.find(card => 
-              card.name.toLowerCase() === cardName
-            ))
-            .filter((card): card is typeof TAROT_CARDS[0] => card !== undefined);
+    console.log('📥 Received response:', response.status, response.statusText);
 
-          if (foundCards.length > 0) {
-            setSelectedCards(foundCards);
-            setShowReading(true);
-            onReadingComplete(foundCards);
-          }
-        }
-      }
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ API Error:', errorData);
+      throw new Error(errorData.error || `API Error: ${response.status} ${response.statusText}`);
     }
-  }, [transcriptGroups, showReading, onReadingComplete]);
 
-  if (!showReading) {
-    return null;
+    const data = await response.json();
+    console.log('✅ Image generated successfully:', data);
+    
+    if (!data.imageUrl) {
+      console.error('❌ No image URL in response:', data);
+      throw new Error('No image URL in response');
+    }
+    
+    return data.imageUrl;
+  } catch (error) {
+    console.error('❌ Error in generateTarotImage:', error);
+    throw error; // Re-throw the error to be handled by the caller
   }
+};
+
+export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadingProps) {
+  const [selectedCards, setSelectedCards] = useState<GeneratedCard[]>([]);
+  const [showReading, setShowReading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const drawRandomCards = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Select 3 random cards
+      const selectedCards = [];
+      const availableCards = [...TAROT_CARDS];
+      
+      for (let i = 0; i < 3; i++) {
+        const randomIndex = Math.floor(Math.random() * availableCards.length);
+        const card = availableCards[randomIndex];
+        const isReversed = Math.random() < 0.5;
+        selectedCards.push({ ...card, isReversed });
+        availableCards.splice(randomIndex, 1);
+      }
+      
+      // Generate images for each card
+      const cardsWithImages = await Promise.all(
+        selectedCards.map(async (card) => {
+          try {
+            const imageUrl = await generateTarotImage(card.name);
+            return { ...card, image: imageUrl };
+          } catch (error) {
+            console.error(`❌ Error generating image for ${card.name}:`, error);
+            return { ...card, image: null };
+          }
+        })
+      );
+      
+      setSelectedCards(cardsWithImages);
+      setShowReading(true);
+      
+      // Send the card names to Flow
+      const cardNames = cardsWithImages.map(card => card.name).join(', ');
+      const message = `I have drawn the following cards for you: ${cardNames}. Let me interpret their meaning for you.`;
+      onReadingComplete(cardsWithImages);
+    } catch (error) {
+      console.error('❌ Error in drawRandomCards:', error);
+      setError(error instanceof Error ? error.message : 'An error occurred while generating the reading');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="mt-8 p-4 bg-base-200 rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Your Tarot Reading</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {selectedCards.map((card) => (
-          <div key={card.name} className="card bg-base-100">
-            <figure className="px-4 pt-4">
-              <img 
-                src={card.image} 
-                alt={card.name}
-                className="rounded-xl h-64 w-auto object-contain"
-              />
-            </figure>
-            <div className="card-body">
-              <h3 className="card-title">{card.name}</h3>
-              <p>{card.meaning}</p>
-            </div>
+    <div className="p-4">
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          <p className="font-bold">Error</p>
+          <p>{error}</p>
+        </div>
+      )}
+      
+      {!showReading ? (
+        <button
+          onClick={drawRandomCards}
+          disabled={isLoading}
+          className="w-full py-3 px-6 bg-purple-600 text-white rounded-lg shadow-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? 'Generating your reading...' : 'Draw Your Cards'}
+        </button>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {selectedCards.map((card, index) => (
+              <div
+                key={`${card.name}-${index}`}
+                className="relative w-48 h-80"
+                style={{
+                  background: 'var(--card-bg)',
+                  border: '1px solid var(--card-border)',
+                  boxShadow: 'var(--card-shadow)',
+                  borderRadius: '0.5rem',
+                  overflow: 'hidden',
+                }}
+              >
+                {card.image ? (
+                  <img
+                    src={card.image}
+                    alt={card.name}
+                    className="w-full h-full object-cover"
+                    style={{
+                      transform: card.isReversed ? 'rotate(180deg)' : 'none',
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <p className="text-gray-500 text-center p-4">Image generation failed</p>
+                  </div>
+                )}
+                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-2">
+                  <h3 className="text-white font-bold">{card.name}</h3>
+                  <p className="text-white text-sm">{card.meaning}</p>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+          <div
+            className="max-w-2xl mx-auto p-6 rounded-lg"
+            style={{
+              background: 'var(--card-bg)',
+              border: '1px solid var(--card-border)',
+              boxShadow: 'var(--card-shadow)',
+            }}
+          >
+            <h3 className="text-xl font-bold mb-4">Interpretation</h3>
+            <p className="text-lg">
+              {selectedCards.map((card, index) => (
+                <span key={index}>
+                  {card.name}: {card.meaning}
+                  {index < selectedCards.length - 1 ? ' | ' : ''}
+                </span>
+              ))}
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
-} 
+}
