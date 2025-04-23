@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useMemo, useState, startTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { start, type StartLivekitResponse } from '../actions';
 import {
   ControlBar,
@@ -29,6 +30,7 @@ export function Room({
 }: {
   personas: Awaited<ReturnType<typeof fetchPersonas>>;
 }) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState<
     StartLivekitResponse | null,
     FormData
@@ -72,8 +74,7 @@ export function Room({
       serverUrl={livekitURL}
       token={livekitToken}
       onDisconnected={() => {
-        // TODO find a better way to reset
-        window.location.reload();
+        router.push('/');
       }}
       className="flex flex-col h-screen bg-gradient-to-b from-gray-900 to-black"
     >
