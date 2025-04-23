@@ -58,12 +58,12 @@ export function CrystalBallAnimation({ color = 'purple' }: { color?: 'purple' | 
   }, [color]);
 
   return (
-    <div className="flex items-center justify-center w-full h-full">
+    <div className="relative w-32 h-32">
       <canvas
         ref={canvasRef}
         width={200}
         height={200}
-        className="w-32 h-32 z-10"
+        className="absolute inset-0 w-full h-full"
       />
     </div>
   );

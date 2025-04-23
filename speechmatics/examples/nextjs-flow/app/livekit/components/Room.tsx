@@ -135,12 +135,12 @@ function Transcript({ sessionId, isPaused }: { sessionId: string; isPaused: bool
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="relative h-32 flex items-center justify-center">
-        <div className="absolute inset-0 z-0">
-          <MagicSparkles />
-        </div>
+      <div className="relative h-32 flex items-center justify-center mb-8">
         <div className="relative z-10">
           <CrystalBallAnimation color={transcriptGroups.length > 0 && transcriptGroups[transcriptGroups.length - 1].type === 'agent' ? 'purple' : 'blue'} />
+        </div>
+        <div className="absolute inset-0 z-0">
+          <MagicSparkles />
         </div>
       </div>
       <TarotReading 
