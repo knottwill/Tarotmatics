@@ -47,14 +47,18 @@ export function Room({
 
   if (!state || !state.success) {
     return (
-      <div className="flex flex-col container m-auto gap-4 p-4">
-        <h1>Starting Tarot Reading...</h1>
-        <div className="loading loading-spinner loading-lg"></div>
-        {!!state?.error && (
-          <div role="alert" className="alert alert-error">
-            <span>{state.error}</span>
-          </div>
-        )}
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-8">
+        <div className="text-center space-y-6">
+          <h1 className="text-4xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+            Preparing Your Tarot Reading...
+          </h1>
+          <div className="loading loading-spinner loading-lg text-purple-500"></div>
+          {!!state?.error && (
+            <div role="alert" className="alert alert-error bg-red-900/50 border-red-500/50">
+              <span className="text-red-200">{state.error}</span>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -69,21 +73,28 @@ export function Room({
         // TODO find a better way to reset
         window.location.reload();
       }}
-      className="flex flex-col h-screen"
+      className="flex flex-col h-screen bg-gradient-to-b from-gray-900 to-black"
     >
-      <div className="flex-1 overflow-auto p-4">
-        <div className="flex justify-end mb-4">
+      <div className="flex-1 overflow-auto p-6">
+        <div className="flex justify-end mb-6">
           <button
             onClick={() => setIsPaused(!isPaused)}
-            className={`btn ${isPaused ? 'btn-primary' : 'btn-secondary'}`}
+            className={`px-6 py-3 rounded-lg transition-all duration-300 ${
+              isPaused 
+                ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border border-purple-500/20 hover:border-purple-500/50'
+            }`}
           >
-            {isPaused ? 'Resume' : 'Pause'}
+            {isPaused ? 'Resume Reading' : 'Pause Reading'}
           </button>
         </div>
         <Transcript sessionId={sessionID} isPaused={isPaused} />
       </div>
       <RoomAudioRenderer />
-      <ControlBar controls={{ camera: false, screenShare: false }} />
+      <ControlBar 
+        controls={{ camera: false, screenShare: false }} 
+        className="bg-gray-800/50 border-t border-purple-500/20"
+      />
     </LiveKitRoom>
   );
 }
@@ -120,8 +131,8 @@ function Transcript({ sessionId, isPaused }: { sessionId: string; isPaused: bool
   }, [transcriptManager]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <TranscriptContainer transcripts={transcriptGroups} />
+    <div className="flex flex-col gap-6">
+      {/* <TranscriptContainer transcripts={transcriptGroups} /> */}
       <TarotReading 
         transcriptGroups={transcriptGroups} 
         onReadingComplete={(cards) => {

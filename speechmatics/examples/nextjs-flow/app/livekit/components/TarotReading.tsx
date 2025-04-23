@@ -413,7 +413,7 @@ interface TarotReadingProps {
 
 export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadingProps) {
   const [selectedCards, setSelectedCards] = useState<typeof TAROT_CARDS[0][]>([]);
-  const [showReading, setShowReading] = useState(false);
+  const [isReadingComplete, setIsReadingComplete] = useState(false);
 
   useEffect(() => {
     // Check the latest transcript group for tarot reading mentions
@@ -450,38 +450,44 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
 
           if (foundCards.length > 0) {
             setSelectedCards(foundCards);
-            setShowReading(true);
+            setIsReadingComplete(true);
             onReadingComplete(foundCards);
           }
         }
       }
     }
-  }, [transcriptGroups, showReading, onReadingComplete]);
-
-  if (!showReading) {
-    return null;
-  }
+  }, [transcriptGroups, onReadingComplete]);
 
   return (
-    <div className="mt-8 p-4 bg-base-200 rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Your Tarot Reading</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {selectedCards.map((card) => (
-          <div key={card.name} className="card bg-base-100">
-            <figure className="px-4 pt-4">
-              <img 
-                src={card.image} 
-                alt={card.name}
-                className="rounded-xl h-64 w-auto object-contain"
-              />
-            </figure>
-            <div className="card-body">
-              <h3 className="card-title">{card.name}</h3>
-              <p>{card.meaning}</p>
+    <div className="bg-gray-800/50 rounded-lg p-6 border border-purple-500/20">
+      <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+        Your Tarot Reading
+      </h2>
+      {selectedCards.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {selectedCards.map((card, index) => (
+            <div 
+              key={index}
+              className="bg-gray-900/50 rounded-lg p-4 border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300"
+            >
+              <div className="aspect-[2/3] mb-4 rounded-lg overflow-hidden">
+                <img 
+                  src={card.image} 
+                  alt={card.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h3 className="text-xl font-semibold text-purple-400 mb-2">{card.name}</h3>
+              <p className="text-gray-300">{card.meaning}</p>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <div className="text-gray-400 mb-4">Waiting for your reading...</div>
+          <div className="loading loading-spinner loading-lg text-purple-500"></div>
+        </div>
+      )}
     </div>
   );
 } 
