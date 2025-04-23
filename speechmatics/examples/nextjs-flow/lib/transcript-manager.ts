@@ -45,8 +45,10 @@ class TranscriptManager extends TypedEventTarget<TranscriptManagerEvents> {
    * Routes different message types to their appropriate handlers
    */
   handleMessage(message: FlowClientIncomingMessage) {
+    console.log('handleMessage', message);
     // Only process messages we care about
     switch (message.message) {
+      case 'AudioAdded':
       case 'AddPartialTranscript':
       case 'AddTranscript':
       case 'ResponseStarted':

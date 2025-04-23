@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
+import { useFlowEventListener } from '@speechmatics/flow-client-react';
 
-export function CrystalBallAnimation() {
+export function CrystalBallAnimation({ color = 'purple' }: { color?: 'purple' | 'blue' }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
   const timeRef = useRef<number>(0);
@@ -27,14 +28,15 @@ export function CrystalBallAnimation() {
       const currentRadius = maxRadius * (0.8 + pulseProgress * 0.2);
       const currentOpacity = 0.3 + pulseProgress * 0.7; // Increased range from 0.3-1.0
       
-      // Create gradient
+      // Create gradient with dynamic color
       const gradient = ctx.createRadialGradient(
         centerX, centerY, 0,
         centerX, centerY, currentRadius
       );
-      gradient.addColorStop(0, `rgba(147, 51, 234, ${currentOpacity})`);
-      gradient.addColorStop(0.5, `rgba(147, 51, 234, ${currentOpacity * 0.6})`); // Increased middle stop opacity
-      gradient.addColorStop(1, 'rgba(147, 51, 234, 0)');
+      const baseColor = color === 'purple' ? '147, 51, 234' : '59, 130, 246';
+      gradient.addColorStop(0, `rgba(${baseColor}, ${currentOpacity})`);
+      gradient.addColorStop(0.5, `rgba(${baseColor}, ${currentOpacity * 0.6})`);
+      gradient.addColorStop(1, `rgba(${baseColor}, 0)`);
       
       // Draw glow
       ctx.fillStyle = gradient;
@@ -53,7 +55,7 @@ export function CrystalBallAnimation() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, []);
+  }, [color]);
 
   return (
     <div className="flex items-center justify-center w-full h-full">

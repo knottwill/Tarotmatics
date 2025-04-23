@@ -21,7 +21,7 @@ import { CrystalBallAnimation } from '@/components/CrystalBallAnimation';
 
 const DEFAULT_TAROT_PERSONA = '';
 
-const TAROT_AGENT_ID = '03c6fc36-d033-4bec-9625-f0e74fad5602:en::latest';
+const TAROT_AGENT_ID = '3511a162-34e4-4da8-9457-5d1685974313:en::latest';
 
 export function Room({
   personas,
@@ -131,9 +131,10 @@ function Transcript({ sessionId, isPaused }: { sessionId: string; isPaused: bool
     };
   }, [transcriptManager]);
 
+
   return (
     <div className="flex flex-col gap-6">
-      <CrystalBallAnimation />
+      <CrystalBallAnimation color={transcriptGroups.length > 0 && transcriptGroups[transcriptGroups.length - 1].type === 'agent' ? 'purple' : 'blue'} />
       <TarotReading 
         transcriptGroups={transcriptGroups} 
         onReadingComplete={(cards) => {

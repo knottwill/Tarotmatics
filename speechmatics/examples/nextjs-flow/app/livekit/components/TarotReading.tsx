@@ -416,7 +416,7 @@ const imageCache: Record<string, string> = {};
 const pendingRequests: Set<string> = new Set();
 const requestPromises: Record<string, Promise<string>> = {};
 
-const generateTarotImage = async (cardName: string, transcript: string): Promise<string> => {
+const generateTarotImage = async (cardName: string): Promise<string> => {
   // Check cache first
   if (imageCache[cardName]) {
     console.log('🎨 Using cached image for:', cardName);
@@ -424,89 +424,55 @@ const generateTarotImage = async (cardName: string, transcript: string): Promise
   }
 
   // If there's already a pending request, return its promise
-  if (requestPromises[cardName] !== undefined) {
+  if (requestPromises[cardName]) {
     console.log('🎨 Reusing pending request for:', cardName);
     return requestPromises[cardName];
   }
 
   console.log('🎨 Starting image generation for card:', cardName);
-  console.log('📚 Transcript length:', transcript.length);
+  const prompt = `A mystical tarot card illustration of ${cardName}, highly detailed, mystical atmosphere, golden accents, intricate patterns, in the style of the Rider-Waite tarot deck, digital art, 4k, masterpiece, best quality`;
   
   // Create a new promise for this request
   requestPromises[cardName] = (async () => {
     try {
       pendingRequests.add(cardName);
-      console.log('🔄 Active requests:', pendingRequests.size);
-
-      // First, generate a personalized prompt using ChatGPT
-      console.log('🤖 Generating personalized prompt for:', cardName);
-      const promptResponse = await fetch('/api/generate-prompt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ transcript, cardName }),
-      });
-
-      if (!promptResponse.ok) {
-        const error = await promptResponse.json();
-        console.error('❌ Prompt generation failed:', error);
-        throw new Error('Failed to generate prompt');
-      }
-
-      const { prompt } = await promptResponse.json();
-      console.log('📝 Using prompt:', prompt);
-      
-      // Now generate the image using DALL-E
-      console.log('🎨 Sending image generation request for:', cardName);
+      console.log('📤 Sending request to our API...');
       const apiUrl = new URL('/api/generate-image', window.location.origin);
-      
-      const imageRequest = {
-        prompt,
-        model: "dall-e-3",
-        size: "1024x1024",
-        quality: "standard",
-        style: "natural"
-      };
-
-      console.log('🎨 DALL-E request:', JSON.stringify(imageRequest, null, 2));
+      console.log('🌐 API URL:', apiUrl.toString());
       
       const response = await fetch(apiUrl.toString(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(imageRequest),
+        body: JSON.stringify({ prompt }),
       });
 
-      console.log('📥 Image generation response status:', response.status);
+      console.log('📥 Received response:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ Image generation failed:', errorData);
+        console.error('❌ API Error:', errorData);
         throw new Error(errorData.error || `API Error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log('✅ Image generated successfully for:', cardName);
-      console.log('🖼️ Image URL:', data.imageUrl);
+      console.log('✅ Image generated successfully:', data);
       
       if (!data.imageUrl) {
-        console.error('❌ No image URL in response');
+        console.error('❌ No image URL in response:', data);
         throw new Error('No image URL in response');
       }
       
       // Cache the image URL
       imageCache[cardName] = data.imageUrl;
-      console.log('💾 Cached image for:', cardName);
       return data.imageUrl;
     } catch (error) {
-      console.error('❌ Error in generateTarotImage for', cardName, ':', error);
+      console.error('❌ Error in generateTarotImage:', error);
       throw error;
     } finally {
       pendingRequests.delete(cardName);
       delete requestPromises[cardName];
-      console.log('🔄 Remaining active requests:', pendingRequests.size);
     }
   })();
 
@@ -567,14 +533,10 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
           
           // Generate images for each card that hasn't been cached yet
           setIsGenerating(true);
-          const transcriptText = transcriptGroups
-            .map(group => group.data.map(response => response.text).join(' '))
-            .join(' ');
-
           foundCards.forEach(card => {
             if (!imageCache[card.name] && !pendingRequests.has(card.name)) {
               setLoadingCards(prev => new Set([...prev, card.name]));
-              generateTarotImage(card.name, transcriptText)
+              generateTarotImage(card.name)
                 .then(() => {
                   setLoadingCards(prev => {
                     const newSet = new Set(prev);
@@ -631,25 +593,17 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
                 <div className={`absolute inset-0 transition-transform duration-500 transform-gpu ${
                   flippedCards.includes(index) ? 'rotate-y-0' : 'rotate-y-180'
                 }`}>
-                  <div className="relative w-full h-full">
+                  {loadingCards.has(selectedCards[index].name) ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                    </div>
+                  ) : (
                     <img
-                      src={selectedCards[index].image} 
+                      src={imageCache[selectedCards[index].name] || selectedCards[index].image} 
                       alt={selectedCards[index].name}
                       className="w-full h-full object-cover"
                     />
-                    {loadingCards.has(selectedCards[index].name) && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-                      </div>
-                    )}
-                    {!loadingCards.has(selectedCards[index].name) && imageCache[selectedCards[index].name] && (
-                      <img
-                        src={imageCache[selectedCards[index].name]} 
-                        alt={selectedCards[index].name}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    )}
-                  </div>
+                  )}
                 </div>
               )}
             </div>
