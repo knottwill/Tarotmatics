@@ -7,13 +7,13 @@ const Card = ({
   heading?: string;
 }) => {
   return (
-    <div className="card bg-base-100 shadow-md card-bordered h-full">
+    <div className="card bg-gray-800/50 backdrop-blur-sm shadow-lg card-bordered h-full border-purple-500/20 hover:border-purple-500/50 transition-all duration-300">
       {heading && (
-        <div className="bg-gray-50 p-5">
-          <h3 className="card-title">{heading}</h3>
+        <div className="bg-gray-900/50 p-5 border-b border-purple-500/20">
+          <h3 className="card-title text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">{heading}</h3>
         </div>
       )}
-      <div className="card-body">{children}</div>
+      <div className="card-body text-gray-200">{children}</div>
     </div>
   );
 };
