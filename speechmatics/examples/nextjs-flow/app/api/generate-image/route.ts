@@ -25,11 +25,12 @@ export async function POST(request: Request) {
           'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "dall-e-3",
+          model: "dall-e-2",
           prompt: prompt,
           n: 1,
-          size: "1024x1024",
-          quality: "standard",
+          //size: "1024x1024", // looks best but more expesive
+          size: "256x256", // cheapest whilst debugging
+          //quality: "standard",
           response_format: "url" // important!
         }),
       });
