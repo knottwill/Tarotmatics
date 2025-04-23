@@ -18,6 +18,7 @@ import type {
 import { TranscriptContainer } from '@/components/TranscriptView';
 import { TarotReading } from './TarotReading';
 import { CrystalBallAnimation } from '@/components/CrystalBallAnimation';
+import { MagicSparkles } from '@/components/MagicSparkles';
 
 const DEFAULT_TAROT_PERSONA = '';
 
@@ -134,7 +135,14 @@ function Transcript({ sessionId, isPaused }: { sessionId: string; isPaused: bool
 
   return (
     <div className="flex flex-col gap-6">
-      <CrystalBallAnimation color={transcriptGroups.length > 0 && transcriptGroups[transcriptGroups.length - 1].type === 'agent' ? 'purple' : 'blue'} />
+      <div className="relative h-32 flex items-center justify-center">
+        <div className="absolute inset-0 z-0">
+          <MagicSparkles />
+        </div>
+        <div className="relative z-10">
+          <CrystalBallAnimation color={transcriptGroups.length > 0 && transcriptGroups[transcriptGroups.length - 1].type === 'agent' ? 'purple' : 'blue'} />
+        </div>
+      </div>
       <TarotReading 
         transcriptGroups={transcriptGroups} 
         onReadingComplete={(cards) => {

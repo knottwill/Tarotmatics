@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { TranscriptContainer } from '@/components/TranscriptView';
 import type { TranscriptGroup } from '@/lib/transcript-types';
+import { MagicSparkles } from '@/components/MagicSparkles';
 
 const TAROT_CARDS = [
   // Major Arcana
@@ -567,7 +568,8 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
   }, [transcriptGroups, onReadingComplete]);
 
   return (
-    <div className="bg-gray-800/50 rounded-lg p-6 border border-purple-500/20 w-[70%] mx-auto">
+    <div className="bg-gray-800/50 rounded-lg p-6 border border-purple-500/20 w-[70%] mx-auto relative">
+      <MagicSparkles />
       <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
         Your Tarot Reading
       </h2>
@@ -575,7 +577,7 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
         {Array.from({ length: 3 }).map((_, index) => (
           <div 
             key={index}
-            className={`bg-gray-900/50 rounded-lg p-4 border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 ${
+            className={`bg-gray-900/50 rounded-lg p-4 border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 relative overflow-hidden ${
               isReadingComplete && !flippedCards.includes(index) ? 'animate-pulse' : ''
             }`}
           >

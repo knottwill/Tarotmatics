@@ -63,7 +63,7 @@ export function CrystalBallAnimation({ color = 'purple' }: { color?: 'purple' | 
         ref={canvasRef}
         width={200}
         height={200}
-        className="w-32 h-32"
+        className="w-32 h-32 z-10"
       />
     </div>
   );
