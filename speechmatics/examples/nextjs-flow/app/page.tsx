@@ -30,15 +30,12 @@ export default function Home() {
         <h1 className="text-6xl font-bold tracking-wider bg-gradient-to-r from-purple-500 via-pink-500 to-purple-400 text-transparent bg-clip-text animate-gradient">
           Tarotmatics
         </h1>
-        <p className="mt-4 text-gray-300 text-xl tracking-wide font-light">
-          The veil listens
-        </p>
         <div className="mt-8">
           <a
             href="/livekit"
             className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 transition-transform shadow-lg font-medium text-lg"
           >
-            Enter the Ether
+            Enter
           </a>
         </div>
         <div className="mt-6 text-sm text-gray-400">
