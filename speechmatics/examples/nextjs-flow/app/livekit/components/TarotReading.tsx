@@ -575,46 +575,50 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
       <MagicSparkles />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
         {Array.from({ length: 3 }).map((_, index) => (
-          <div 
-            key={index}
-            className={`bg-gray-900/50 rounded-lg p-4 border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 relative overflow-hidden ${
-              isReadingComplete && !flippedCards.includes(index) ? 'animate-pulse' : ''
-            }`}
-          >
-            <div className="aspect-[2/3] mb-4 rounded-lg overflow-hidden relative">
-              <div className={`absolute inset-0 transition-transform duration-500 transform-gpu ${
-                flippedCards.includes(index) ? 'rotate-y-180' : ''
-              }`}>
-                <img 
-                  src="/tarot/reverse.png" 
-                  alt="Card Back"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              {selectedCards[index] && (
+          <div key={index} className="flex flex-col items-center relative z-10">
+            <h3 className="text-lg font-semibold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 relative z-10">
+              {index === 0 ? 'Past' : index === 1 ? 'Present' : 'Future'}
+            </h3>
+            <div 
+              className={`bg-gray-900/50 rounded-lg p-4 border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 relative overflow-hidden w-full ${
+                isReadingComplete && !flippedCards.includes(index) ? 'animate-pulse' : ''
+              }`}
+            >
+              <div className="aspect-[2/3] mb-4 rounded-lg overflow-hidden relative">
                 <div className={`absolute inset-0 transition-transform duration-500 transform-gpu ${
-                  flippedCards.includes(index) ? 'rotate-y-0' : 'rotate-y-180'
+                  flippedCards.includes(index) ? 'rotate-y-180' : ''
                 }`}>
-                  {loadingCards.has(selectedCards[index].name) ? (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-                    </div>
-                  ) : (
-                    <img
-                      src={imageCache[selectedCards[index].name] || selectedCards[index].image} 
-                      alt={selectedCards[index].name}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
+                  <img 
+                    src="/tarot/reverse.png" 
+                    alt="Card Back"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {selectedCards[index] && (
+                  <div className={`absolute inset-0 transition-transform duration-500 transform-gpu ${
+                    flippedCards.includes(index) ? 'rotate-y-0' : 'rotate-y-180'
+                  }`}>
+                    {loadingCards.has(selectedCards[index].name) ? (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                      </div>
+                    ) : (
+                      <img
+                        src={imageCache[selectedCards[index].name] || selectedCards[index].image} 
+                        alt={selectedCards[index].name}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+              {selectedCards[index] && flippedCards.includes(index) && (
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-purple-400">{selectedCards[index].name}</h3>
+                  <p className="text-sm text-gray-300">{selectedCards[index].meaning}</p>
                 </div>
               )}
             </div>
-            {selectedCards[index] && flippedCards.includes(index) && (
-              <div className="text-center">
-                <h3 className="text-xl font-semibold text-purple-400">{selectedCards[index].name}</h3>
-                <p className="text-sm text-gray-300">{selectedCards[index].meaning}</p>
-              </div>
-            )}
           </div>
         ))}
       </div>
