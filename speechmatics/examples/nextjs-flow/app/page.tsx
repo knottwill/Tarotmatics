@@ -4,21 +4,25 @@ export default function Home() {
       
       {/* Floating Mystical Symbols */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        {[...Array(12)].map((_, i) => (
-          <span
-            key={i}
-            className="absolute text-white/10 text-4xl animate-float-slow"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 10}s`,
-              animationDuration: `${10 + Math.random() * 10}s`,
-              transform: `rotate(${Math.random() * 360}deg)`,
-            }}
-          >
-            {randomMysticSymbol()}
-          </span>
-        ))}
+        {[...Array(24)].map((_, i) => {
+          const startX = Math.random() * 100;
+          const startY = Math.random() * 100;
+          return (
+            <span
+              key={i}
+              className="absolute text-white/10 animate-float-slow"
+              style={{
+                top: `${startY}%`,
+                left: `${startX}%`,
+                animationDelay: `${Math.random() * 10}s`,
+                animationDuration: `${15 + Math.random() * 15}s`,
+                fontSize: `${2 + Math.random() * 4}rem`,
+              }}
+            >
+              {randomMysticSymbol()}
+            </span>
+          );
+        })}
       </div>
 
       {/* Main Content */}
@@ -27,7 +31,7 @@ export default function Home() {
           Tarotmatics
         </h1>
         <p className="mt-4 text-gray-300 text-xl tracking-wide font-light">
-          Where the cards speak and the AI listens
+          The veil listens
         </p>
         <div className="mt-8">
           <a
