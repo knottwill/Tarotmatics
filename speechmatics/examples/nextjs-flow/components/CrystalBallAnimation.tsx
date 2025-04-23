@@ -25,7 +25,7 @@ export function CrystalBallAnimation() {
       // Calculate pulsing values
       const pulseProgress = Math.sin(timeRef.current) * 0.5 + 0.5; // 0 to 1
       const currentRadius = maxRadius * (0.8 + pulseProgress * 0.2);
-      const currentOpacity = 0.5 + pulseProgress * 0.3;
+      const currentOpacity = 0.3 + pulseProgress * 0.7; // Increased range from 0.3-1.0
       
       // Create gradient
       const gradient = ctx.createRadialGradient(
@@ -33,7 +33,7 @@ export function CrystalBallAnimation() {
         centerX, centerY, currentRadius
       );
       gradient.addColorStop(0, `rgba(147, 51, 234, ${currentOpacity})`);
-      gradient.addColorStop(0.5, `rgba(147, 51, 234, ${currentOpacity * 0.5})`);
+      gradient.addColorStop(0.5, `rgba(147, 51, 234, ${currentOpacity * 0.6})`); // Increased middle stop opacity
       gradient.addColorStop(1, 'rgba(147, 51, 234, 0)');
       
       // Draw glow
