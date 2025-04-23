@@ -593,13 +593,19 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
                 <div className={`absolute inset-0 transition-transform duration-500 transform-gpu ${
                   flippedCards.includes(index) ? 'rotate-y-0' : 'rotate-y-180'
                 }`}>
-                  {loadingCards.has(selectedCards[index].name) ? (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                  <img
+                    src={selectedCards[index].image} 
+                    alt={selectedCards[index].name}
+                    className="w-full h-full object-cover"
+                  />
+                  {loadingCards.has(selectedCards[index].name) && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
                     </div>
-                  ) : (
+                  )}
+                  {!loadingCards.has(selectedCards[index].name) && imageCache[selectedCards[index].name] && (
                     <img
-                      src={imageCache[selectedCards[index].name] || selectedCards[index].image} 
+                      src={imageCache[selectedCards[index].name]} 
                       alt={selectedCards[index].name}
                       className="w-full h-full object-cover"
                     />
