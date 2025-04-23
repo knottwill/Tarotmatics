@@ -1,39 +1,52 @@
 export default function Home() {
   return (
-    <div className="flex flex-col gap-8 h-screen justify-center items-center bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{ animationDuration: '4s' }}></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse" style={{ animationDuration: '6s' }}></div>
+    <div className="relative flex flex-col justify-center items-center min-h-screen bg-gradient-to-b from-gray-950 via-black to-gray-900 text-white overflow-hidden">
+      
+      {/* Floating Mystical Symbols */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {[...Array(12)].map((_, i) => (
+          <span
+            key={i}
+            className="absolute text-white/10 text-4xl animate-float-slow"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 10}s`,
+              animationDuration: `${10 + Math.random() * 10}s`,
+              transform: `rotate(${Math.random() * 360}deg)`,
+            }}
+          >
+            {randomMysticSymbol()}
+          </span>
+        ))}
       </div>
 
-      <div className="text-center space-y-4 relative z-10">
-        <h1 className="text-5xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 animate-gradient">
+      {/* Main Content */}
+      <div className="relative z-10 px-6 py-12 text-center max-w-2xl backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg">
+        <h1 className="text-6xl font-bold tracking-wider bg-gradient-to-r from-purple-500 via-pink-500 to-purple-400 text-transparent bg-clip-text animate-gradient">
           Tarotmatics
         </h1>
-        <p className="text-gray-300 text-lg font-light tracking-wider">Please choose your connection method to the Ether</p>
-      </div>
-
-      <nav className="grid grid-cols-2 gap-6 relative z-10">
-        <a 
-          href="/websocket" 
-          className="group px-8 py-4 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-300 border border-purple-500/20 hover:border-purple-500/50 text-center text-lg font-medium shadow-lg hover:shadow-purple-500/20 backdrop-blur-sm relative overflow-hidden"
-        >
-          <span className="relative z-10">Websocket</span>
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-        </a>
-        <a 
-          href="/livekit" 
-          className="group px-8 py-4 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-300 border border-purple-500/20 hover:border-purple-500/50 text-center text-lg font-medium shadow-lg hover:shadow-purple-500/20 backdrop-blur-sm relative overflow-hidden"
-        >
-          <span className="relative z-10">Livekit</span>
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-        </a>
-      </nav>
-
-      <div className="absolute bottom-4 text-gray-500 text-sm font-light tracking-wider relative z-10">
-        <span className="opacity-70">Powered by</span> <span className="text-purple-400">Speechmatics</span>
+        <p className="mt-4 text-gray-300 text-xl tracking-wide font-light">
+          Where the cards speak and the AI listens
+        </p>
+        <div className="mt-8">
+          <a
+            href="/livekit"
+            className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 transition-transform shadow-lg font-medium text-lg"
+          >
+            Enter the Ether
+          </a>
+        </div>
+        <div className="mt-6 text-sm text-gray-400">
+          Powered by <span className="text-purple-400">Speechmatics</span>
+        </div>
       </div>
     </div>
   );
+}
+
+// Utility for random mystical symbols (Unicode & pseudo-Glyphs)
+function randomMysticSymbol() {
+  const symbols = ['☽', '☾', '✶', '✦', '☿', '⚚', '♃', '♄', '⛧', '☥', 'ᛉ', '𓂀'];
+  return symbols[Math.floor(Math.random() * symbols.length)];
 }

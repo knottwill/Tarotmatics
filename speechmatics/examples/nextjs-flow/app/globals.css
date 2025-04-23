@@ -79,3 +79,18 @@ body {
     @apply font-bold;
   }
 }
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(360deg);
+  }
+}
+
+.animate-float-slow {
+  animation-name: float-slow;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
