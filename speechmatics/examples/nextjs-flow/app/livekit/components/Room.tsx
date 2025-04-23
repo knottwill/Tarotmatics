@@ -102,7 +102,6 @@ export function Room({
 
 function Transcript({ sessionId, isPaused }: { sessionId: string; isPaused: boolean }) {
   const [transcriptGroups, setTranscriptGroups] = useState<TranscriptGroup[]>([]);
-  const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
   const decoder = useMemo(() => new TextDecoder(), []);
   const transcriptManager = useMemo(() => new TranscriptManager(), []);
 
@@ -124,14 +123,6 @@ function Transcript({ sessionId, isPaused }: { sessionId: string; isPaused: bool
   useEffect(() => {
     const handleUpdate = (event: TranscriptUpdateEvent) => {
       setTranscriptGroups(event.transcriptGroups);
-      
-      // Check if the last message is from the agent and is recent
-      const lastGroup = event.transcriptGroups[event.transcriptGroups.length - 1];
-      if (lastGroup && lastGroup.type === 'agent') {
-        setIsAgentSpeaking(true);
-        // Reset speaking state after a delay
-        setTimeout(() => setIsAgentSpeaking(false), 2000);
-      }
     };
 
     transcriptManager.addEventListener('update', handleUpdate);
@@ -142,7 +133,7 @@ function Transcript({ sessionId, isPaused }: { sessionId: string; isPaused: bool
 
   return (
     <div className="flex flex-col gap-6">
-      <CrystalBallAnimation isSpeaking={isAgentSpeaking} />
+      <CrystalBallAnimation />
       <TarotReading 
         transcriptGroups={transcriptGroups} 
         onReadingComplete={(cards) => {
