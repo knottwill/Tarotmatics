@@ -454,7 +454,7 @@ const generateTarotImage = async (cardName: string): Promise<string> => {
     return data.imageUrl;
   } catch (error) {
     console.error('❌ Error in generateTarotImage:', error);
-    throw error; // Re-throw the error to be handled by the caller
+    throw error;
   }
 };
 
