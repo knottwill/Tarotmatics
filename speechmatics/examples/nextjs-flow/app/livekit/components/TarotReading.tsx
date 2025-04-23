@@ -223,10 +223,7 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
   }, [transcriptGroups]);
 
   return (
-    <div className="bg-gray-800/50 rounded-lg p-6 border border-purple-500/20 w-[70%] mx-auto relative">
-      <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 relative z-10">
-        Your Tarot Reading
-      </h2>
+    <div className="bg-gray-800/50 rounded-lg p-4 border border-purple-500/20 w-[70%] mx-auto relative">
       <MagicSparkles />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
         {Array.from({ length: 3 }).map((_, index) => (
