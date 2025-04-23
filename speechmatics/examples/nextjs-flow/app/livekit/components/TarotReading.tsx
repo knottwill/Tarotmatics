@@ -15,6 +15,8 @@ interface TarotReadingProps {
 const imageCache: Record<string, string> = {};
 const pendingRequests: Set<string> = new Set();
 const requestPromises: Record<string, Promise<string>> = {};
+const preGeneratedCards: Set<string> = new Set();
+const preGenerationStatus: Record<string, 'pending' | 'generating' | 'complete' | 'error'> = {};
 
 const generateTarotImage = async (cardName: string, transcriptGroups: TranscriptGroup[]): Promise<string> => {
   // Check cache first
@@ -118,13 +120,40 @@ const generateTarotImage = async (cardName: string, transcriptGroups: Transcript
   return requestPromises[cardName];
 };
 
+const preGenerateTarotImage = async (cardName: string, transcriptGroups: TranscriptGroup[]) => {
+  if (preGeneratedCards.has(cardName)) {
+    console.log('🎨 Card already pre-generated:', cardName);
+    return;
+  }
+
+  console.log('🎨 Pre-generating image for card:', cardName);
+  preGeneratedCards.add(cardName);
+  preGenerationStatus[cardName] = 'generating';
+  
+  try {
+    await generateTarotImage(cardName, transcriptGroups);
+    console.log('✅ Pre-generation complete for card:', cardName);
+    preGenerationStatus[cardName] = 'complete';
+  } catch (error) {
+    console.error('❌ Error in pre-generation for card:', cardName, error);
+    preGeneratedCards.delete(cardName);
+    preGenerationStatus[cardName] = 'error';
+  }
+};
+
 export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadingProps) {
   const [selectedCards, setSelectedCards] = useState<TarotCard[]>([]);
   const [isReadingComplete, setIsReadingComplete] = useState(false);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingCards, setLoadingCards] = useState<Set<string>>(new Set());
+  const [preGenerationProgress, setPreGenerationProgress] = useState<Record<string, 'pending' | 'generating' | 'complete' | 'error'>>({});
   const lastProcessedGroupRef = useRef<string>('');
+
+  // Update pre-generation progress when status changes
+  useEffect(() => {
+    setPreGenerationProgress(prev => ({ ...prev, ...preGenerationStatus }));
+  }, [preGenerationStatus]);
 
   useEffect(() => {
     // Check the latest transcript group for tarot reading mentions
@@ -147,6 +176,20 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
       .join(' ');
     
     console.log('📝 Processing message:', text);
+    
+    // Check for pre-generation tags
+    const preGenerateMatches = text.match(/<TAROT-PREGENERATE revealed='([^']+)' time='([^']+)'\/>/gi);
+    if (preGenerateMatches) {
+      console.log('🎴 Found pre-generation tags:', preGenerateMatches);
+      
+      for (const match of preGenerateMatches) {
+        const [, cardName, time] = match.match(/<TAROT-PREGENERATE revealed='([^']+)' time='([^']+)'\/>/i) || [];
+        if (cardName) {
+          console.log('🎴 Pre-generating card:', { cardName, time });
+          preGenerateTarotImage(cardName, transcriptGroups);
+        }
+      }
+    }
     
     // Check for XML format tarot card reveal with time attribute
     const tarotRevealMatch = text.match(/<TAROT revealed='([^']+)' time='([^']+)'\/>/i);
@@ -250,9 +293,16 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
                   <div className={`absolute inset-0 transition-transform duration-500 transform-gpu ${
                     flippedCards.includes(index) ? 'rotate-y-0' : 'rotate-y-180'
                   }`}>
-                    {loadingCards.has(selectedCards[index].name) ? (
+                    {loadingCards.has(selectedCards[index].name) || preGenerationProgress[selectedCards[index].name] === 'generating' ? (
                       <div className="w-full h-full flex items-center justify-center bg-gray-800">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                      </div>
+                    ) : preGenerationProgress[selectedCards[index].name] === 'error' ? (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                        <div className="text-red-500 text-center">
+                          <p>Error generating image</p>
+                          <p className="text-sm">Please try again</p>
+                        </div>
                       </div>
                     ) : (
                       <img
@@ -268,6 +318,12 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
                 <div className="text-center">
                   <h3 className="text-xl font-semibold text-purple-400">{selectedCards[index].name}</h3>
                   <p className="text-sm text-gray-300">{selectedCards[index].meaning}</p>
+                  {preGenerationProgress[selectedCards[index].name] === 'generating' && (
+                    <p className="text-xs text-purple-400 mt-1">Generating image...</p>
+                  )}
+                  {preGenerationProgress[selectedCards[index].name] === 'error' && (
+                    <p className="text-xs text-red-400 mt-1">Failed to generate image</p>
+                  )}
                 </div>
               )}
             </div>
@@ -277,6 +333,25 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
       {isGenerating && (
         <div className="mt-4 text-center text-purple-400">
           Generating your cards...
+        </div>
+      )}
+      {/* Show pre-generation status */}
+      {Object.entries(preGenerationProgress).length > 0 && (
+        <div className="mt-4 text-center">
+          <h4 className="text-sm font-semibold text-purple-400 mb-2">Pre-generation Status</h4>
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            {Object.entries(preGenerationProgress).map(([cardName, status]) => (
+              <div key={cardName} className="flex items-center justify-center gap-1">
+                <span className={`w-2 h-2 rounded-full ${
+                  status === 'complete' ? 'bg-green-500' :
+                  status === 'generating' ? 'bg-purple-500 animate-pulse' :
+                  status === 'error' ? 'bg-red-500' :
+                  'bg-gray-500'
+                }`}></span>
+                <span className="text-gray-300">{cardName}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
