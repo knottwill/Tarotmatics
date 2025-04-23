@@ -279,38 +279,55 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
                 isReadingComplete && !flippedCards.includes(index) ? 'animate-pulse' : ''
               }`}
             >
-              <div className="aspect-[2/3] mb-4 rounded-lg overflow-hidden relative">
+              <div className="aspect-[2/3] mb-4 rounded-lg p-1 relative">
                 <div className={`absolute inset-0 transition-transform duration-500 transform-gpu ${
                   flippedCards.includes(index) ? 'rotate-y-180' : ''
                 }`}>
                   <img 
                     src="/tarot/reverse.png" 
                     alt="Card Back"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-lg"
                   />
                 </div>
                 {selectedCards[index] && (
                   <div className={`absolute inset-0 transition-transform duration-500 transform-gpu ${
                     flippedCards.includes(index) ? 'rotate-y-0' : 'rotate-y-180'
                   }`}>
-                    {loadingCards.has(selectedCards[index].name) || preGenerationProgress[selectedCards[index].name] === 'generating' ? (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-                      </div>
-                    ) : preGenerationProgress[selectedCards[index].name] === 'error' ? (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-800">
-                        <div className="text-red-500 text-center">
-                          <p>Error generating image</p>
-                          <p className="text-sm">Please try again</p>
-                        </div>
-                      </div>
-                    ) : (
+                    <div className="w-full h-full relative">
                       <img
-                        src={imageCache[selectedCards[index].name] || selectedCards[index].image} 
+                        src={selectedCards[index].image}
                         alt={selectedCards[index].name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover rounded-lg opacity-20"
                       />
-                    )}
+                      {loadingCards.has(selectedCards[index].name) || preGenerationProgress[selectedCards[index].name] === 'generating' ? (
+                        <div className="absolute inset-0 flex items-center justify-center z-10">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                            <p className="text-purple-400 text-sm">Generating your card...</p>
+                          </div>
+                        </div>
+                      ) : preGenerationProgress[selectedCards[index].name] === 'error' ? (
+                        <div className="absolute inset-0 flex items-center justify-center z-10">
+                          <div className="text-red-500 text-center">
+                            <p>Error generating image</p>
+                            <p className="text-sm">Please try again</p>
+                          </div>
+                        </div>
+                      ) : !imageCache[selectedCards[index].name] ? (
+                        <div className="absolute inset-0 flex items-center justify-center z-10">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                            <p className="text-purple-400 text-sm">Preparing your card...</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <img
+                          src={imageCache[selectedCards[index].name]} 
+                          alt={selectedCards[index].name}
+                          className="absolute inset-0 w-full h-full object-cover rounded-lg z-20"
+                        />
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

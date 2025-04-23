@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       },
       {
         role: "user",
-        content: `Generate a DALL-E 3 prompt for the ${card.name} tarot card. The card's traditional meaning is: ${card.meaning}. The conversation context is: ${conversationContext}. Create a prompt that combines the card's meaning with the conversation context in a mystical and symbolic way.`
+        content: `Generate a DALL-E 3 prompt for the ${card.name} tarot card. The card's traditional meaning is: ${card.meaning}. The conversation context is: ${conversationContext}. Create a prompt that combines the card's meaning with the conversation context in a symbolic way in the style of the Rider-Waite tarot deck.`
       }
     ];
 
