@@ -467,19 +467,19 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
   }, [transcriptGroups, onReadingComplete]);
 
   return (
-    <div className="bg-gray-800/50 rounded-lg p-6 border border-purple-500/20">
+    <div className="bg-gray-800/50 rounded-lg p-10 border border-purple-500/20 max-w-[3000px] mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
         Your Tarot Reading
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-2">
         {Array.from({ length: 3 }).map((_, index) => (
           <div 
             key={index}
-            className={`bg-gray-900/50 rounded-lg p-4 border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 ${
+            className={`bg-gray-900/50 rounded-lg p-1 border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 ${
               isReadingComplete && !flippedCards.includes(index) ? 'animate-pulse' : ''
             }`}
           >
-            <div className="aspect-[2/3] mb-4 rounded-lg overflow-hidden relative">
+            <div className="aspect-[2/3] mb-1 rounded-lg overflow-hidden relative">
               <div className={`absolute inset-0 transition-transform duration-500 transform-gpu ${
                 flippedCards.includes(index) ? 'rotate-y-180' : ''
               }`}>
@@ -502,10 +502,10 @@ export function TarotReading({ transcriptGroups, onReadingComplete }: TarotReadi
               )}
             </div>
             {selectedCards[index] && flippedCards.includes(index) && (
-              <>
-                <h3 className="text-xl font-semibold text-purple-400 mb-2">{selectedCards[index].name}</h3>
-                <p className="text-gray-300">{selectedCards[index].meaning}</p>
-              </>
+              <div className="text-center">
+                <h3 className="text-xl font-semibold text-purple-400">{selectedCards[index].name}</h3>
+                <p className="text-[10px] text-gray-300 line-clamp-1">{selectedCards[index].meaning}</p>
+              </div>
             )}
           </div>
         ))}
