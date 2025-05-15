@@ -14,7 +14,7 @@ cd Tarotmatics/main
 pnpm install
 ```
 
-You will need a Flow API key from the [Speechmatics Portal](https://portal.speechmatics.com/dashboard), a stable diffusion API key, and an open ai API key. Copy the example file and fill in the API keys:
+You will need a Flow API key from the [Speechmatics Portal](https://portal.speechmatics.com/dashboard), and an open ai API key. Copy the example file and fill in the API keys:
 
 ```bash
 cp .env.example .env
@@ -22,7 +22,6 @@ cp .env.example .env
 
 ```.env
 API_KEY=
-STABLE_DIFFUSION_API_KEY=
 OPENAI_API_KEY=
 ```
 
