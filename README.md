@@ -1,5 +1,7 @@
 # Tarotmatics (for Hackmatics at Speechmatics)
 
+![UI](./UI.png)
+
 Tarotmatics is a personalized Tarot card reader:
 - Open the app and answer Fortuna's questions (ensure you have a working Mic). 
 - Fortuna will generate three fitting tarot cards with personalised artwork.
