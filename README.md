@@ -2,7 +2,7 @@
 
 ![UI](./UI.png)
 
-Tarotmatics is a personalized Tarot card reader:
+Tarotmatics is a AI-driven personalized Tarot card reader:
 - Open the app and answer Fortuna's questions (ensure you have a working Mic). 
 - Fortuna will generate three fitting tarot cards with personalised artwork.
 - Fortuna will then produce an interpretation of the cards, tailored to your unique situation and responses.
