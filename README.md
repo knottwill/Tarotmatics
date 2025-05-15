@@ -1,4 +1,4 @@
-# Tarotmatics (for Hackmatics at Speechmatics)
+# Tarotmatics
 
 ![UI](./UI.png)
 
